@@ -9,8 +9,9 @@ from .models import *
 
 class Parse:
     def __init__(self,files,title):
-        self.model_list = [ ExecInstance() ]
-        self.model_list[0].title = title
+        self.exec_instance = ExecInstance()
+        self.exec_instance.title = title
+        self.exec_instance.save()
         self.files = files
         self.redirect_url = self.construct_redirect_url()
         self.error = None
@@ -21,6 +22,7 @@ class Parse:
                 self.error = e
                 break
         if self.error is not None:
+            exec_instance.delete()
             raise self.error
 
     def __str__(self):
@@ -30,20 +32,18 @@ class Parse:
         return self.files
 
     def parse(self,file):
-
         aeps = AEPS()
         aeps.aeps = self.get_aeps(file)
-        aeps.exec_instance = self.model_list[0]
-
+        aeps.exec_instance = self.exec_instance
+        aeps.save()
         try:
             for line in file:
                 decoded_line = line.decode('UTF-8')
                 self.parse_line(decoded_line,aeps)
             self.parse_sanity_check(file,aeps)
         except ParseError:
+            aeps.delete()
             raise
-        finally: #only for testing; should be else: no need to perform action if sanity check failed
-            self.model_list.append(aeps)
 
     def parse_line(self,line,aeps):
         p_grid_size = re.compile(r'^DefineGridSize\((?P<x_size>[0-9]+),(?P<y_size>[0-9]+),[0-9]+,[0-9]+\)$')
@@ -59,16 +59,15 @@ class Parse:
         if m_grid_size:
             x = int(m_grid_size.group('x_size'))
             y = int(m_grid_size.group('y_size'))
-            self.model_list[0].grid_size = x * y
+            self.exec_instance.grid_size = x * y
+            self.exec_instance.save()
 
         elif m_register_element:
             registered_element = RegisteredElement()
-            registered_element.exec_instance = self.model_list[0]
+            registered_element.exec_instance = self.exec_instance
             registered_element.element_name = m_register_element.group('element_name')
             registered_element.element_id = m_register_element.group('element_id')
-
-            self.model_list.append(registered_element)
-
+            registered_element.save()
         elif m_site:
             site = Site()
             site.aeps = aeps
@@ -76,16 +75,13 @@ class Parse:
             site.y = m_site.group('y')
             site.atom_type = m_site.group('atom_type')
             site.val = m_site.group('atom_value')
-
-            self.model_list.append(site)
-
+            site.save()
         elif m_log_message:
             log_message = LogMessage()
             log_message.aeps = aeps
             log_message.actual_aeps = m_log_message.group('actual_aeps')
             log_message.message = m_log_message.group('message')
-
-            self.model_list.append(log_message)
+            log_message.save()
 
     def parse_sanity_check(self,file,aeps):
         try:
@@ -94,18 +90,18 @@ class Parse:
             raise
 
     def site_count_check(self,file,aeps):
-        if self.model_list[0].grid_size != aeps.site_set.count():
+        if self.exec_instance.grid_size != aeps.site_set.count():
             raise ParseError(
                 'File {0} failed site count check.'
                 'Grid Size: {1}'
                 'Sites Found: {2}'
                 .format(
                     file.name,
-                    self.model_list[0].grid_size,
+                    self.exec_instance.grid_size,
                     aeps.site_set.count()
                 )
             )
-        elif self.model_list[0].grid_size == 0:
+        elif self.exec_instance.grid_size == 0:
             raise ParseError('Site count check could not determine grid size.')
         elif aeps.site_set.count() == 0:
             raise ParseError('No sites found.')
@@ -114,7 +110,7 @@ class Parse:
 
     def construct_redirect_url(self):
         ret = reverse('exec_instances:exec_instances')
-        ret += self.model_list[0].title
+        ret += self.exec_instance.title
         ret += "/"
         return ret
 

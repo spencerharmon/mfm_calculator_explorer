@@ -13,7 +13,10 @@ class RegisteredElement(models.Model):
     element_name = models.CharField(max_length=100)
 
     def __str__(self):
-       return str(self.exec_instance) + ", " + self.element_name
+        return '{0}, {1}'.format(
+            self.exec_instance,
+            self.element_name
+        )
 
 class ElementParseRule(models.Model):
     registered_element = models.ForeignKey('RegisteredElement', on_delete=models.CASCADE)
@@ -21,19 +24,32 @@ class ElementParseRule(models.Model):
     element_member_position = models.IntegerField()
 
     def __str__(self):
-        return self.registered_element + ", " + self.element_member_name + ", position: " + self.element.member_position
+        return '{0}, {1}, position: {2}'.format(
+            self.registered_element,
+            self.element_member_name,
+            self.element.member_position
+        )
 
 class AEPS(models.Model):
     exec_instance = models.ForeignKey('ExecInstance', on_delete=models.CASCADE)
     aeps = models.IntegerField()
 
     def __str__(self):
-        return str(self.exec_instance) + ", " + self.aeps
+        return '{0}, {1}'.format(
+            self.exec_instance,
+            self.aeps
+        )
 
 class LogMessage(models.Model):
     aeps = models.ForeignKey('AEPS',on_delete=models.CASCADE)
     message = models.CharField(max_length=500)
     actual_aeps = models.CharField(max_length=50)
+
+    def __str__(self):
+        return '{0}, {1}'.format(
+            self.aeps,
+            self.actual_aeps
+        )
 
 class Site(models.Model):
     aeps = models.ForeignKey('AEPS',on_delete=models.CASCADE)
@@ -43,8 +59,11 @@ class Site(models.Model):
     atom_type = models.CharField(max_length=5)
 
     def __str__(self):
-        xy = str(self.x), str(self.y)
-        return self.aeps + ", " + self.xy
+        xy = '{0},{1}'.format(self.x,self.y)
+        return '{0}, {1}'.format(
+            self.aeps,
+            xy
+        )
 
 class SiteDetail(models.Model):
     site = models.ForeignKey('Site', on_delete=models.CASCADE)
@@ -52,4 +71,8 @@ class SiteDetail(models.Model):
     atom_member_value = models.CharField(max_length=96)
 
     def __str__(self):
-        return self.site + ", " + self.atom_member_name + ": " + self.atom_member_value
+        return '{0}, {1}: {2}'.format(
+            self.site,
+            self.atom_member_name,
+            self.atom_member_value
+        )
