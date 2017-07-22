@@ -13,7 +13,7 @@ class RegisteredElement(models.Model):
     element_name = models.CharField(max_length=100)
 
     def __str__(self):
-       return self.exec_instance + ", " + self.element_name
+       return str(self.exec_instance) + ", " + self.element_name
 
 class ElementParseRule(models.Model):
     registered_element = models.ForeignKey('RegisteredElement', on_delete=models.CASCADE)
@@ -28,7 +28,12 @@ class AEPS(models.Model):
     aeps = models.IntegerField()
 
     def __str__(self):
-        return self.exec_instance + ", " + self.aeps
+        return str(self.exec_instance) + ", " + self.aeps
+
+class LogMessage(models.Model):
+    aeps = models.ForeignKey('AEPS',on_delete=models.CASCADE)
+    message = models.CharField(max_length=500)
+    actual_aeps = models.CharField(max_length=50)
 
 class Site(models.Model):
     aeps = models.ForeignKey('AEPS',on_delete=models.CASCADE)

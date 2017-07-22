@@ -30,15 +30,16 @@ class Parse:
         return self.files
 
     def parse(self,file):
+
         aeps = AEPS()
         aeps.aeps = self.get_aeps(file)
         aeps.exec_instance = self.model_list[0]
 
         try:
             for line in file:
-                self.parse_line(str(line),aeps)
+                decoded_line = line.decode('UTF-8')
+                self.parse_line(decoded_line,aeps)
             self.parse_sanity_check(file,aeps)
-            raise ParseError('works when called from parse')
         except ParseError:
             raise
         finally: #only for testing; should be else: no need to perform action if sanity check failed
@@ -46,9 +47,9 @@ class Parse:
 
     def parse_line(self,line,aeps):
         p_grid_size = re.compile(r'^DefineGridSize\((?P<x_size>[0-9]+),(?P<y_size>[0-9]+),[0-9]+,[0-9]+\)$')
-        p_register_element = re.compile(r'^RegisterElement\(Ue[0-9]+(?P<element_name>[A-Za-z]+)10-[0-9]+,(?P<element_id>\W)\)$')
-        p_site = re.compile(r'^Site\((?P<x>[0-9]+),(?P<y>[0-9]+),\W*,(?P<atom_type>[A-F0-9]+),(?P<atom_value>[A-F0-9]).*\)$')
-        p_log_message = re.compile(r'^\s+PP\(txln="[0-9]+-[0-9]+:\s\b(?P<actual_aeps>AEPS[0-9]+)\b.*MSG:\s(?P<message>.*)\"\)')
+        p_register_element = re.compile(r'^RegisterElement\(Ue[0-9]+(?P<element_name>[A-Za-z]+)10-[0-9]+,(?P<element_id>T[A-F0-9]+)\)$')
+        p_site = re.compile(r'^Site\((?P<x>[0-9]+),(?P<y>[0-9]+),[A-F0-9]+,(?P<atom_type>T[A-F0-9]+),(?P<atom_value>[A-F0-9]+),.*\)$')
+        p_log_message = re.compile(r'^\s+PP\(txln="[0-9]+-[0-9]+:\s\b(?P<actual_aeps>[0-9]+AEPS)\b\s\[[0-9A-F]+\]MSG:\s(?P<message>.*)\"\)')
 
         m_grid_size = p_grid_size.search(line)
         m_register_element = p_register_element.search(line)
@@ -56,10 +57,12 @@ class Parse:
         m_log_message = p_log_message.search(line)
 
         if m_grid_size:
-            self.model_list[0].grid_size = m_grid_size.group('x_size') * m_grid_size.group('y_size')
+            x = int(m_grid_size.group('x_size'))
+            y = int(m_grid_size.group('y_size'))
+            self.model_list[0].grid_size = x * y
 
         elif m_register_element:
-            registered_element = RegisterElement()
+            registered_element = RegisteredElement()
             registered_element.exec_instance = self.model_list[0]
             registered_element.element_name = m_register_element.group('element_name')
             registered_element.element_id = m_register_element.group('element_id')
@@ -92,7 +95,16 @@ class Parse:
 
     def site_count_check(self,file,aeps):
         if self.model_list[0].grid_size != aeps.site_set.count():
-            raise ParseError('File %s failed site count check' % file.name)
+            raise ParseError(
+                'File {0} failed site count check.'
+                'Grid Size: {1}'
+                'Sites Found: {2}'
+                .format(
+                    file.name,
+                    self.model_list[0].grid_size,
+                    aeps.site_set.count()
+                )
+            )
         elif self.model_list[0].grid_size == 0:
             raise ParseError('Site count check could not determine grid size.')
         elif aeps.site_set.count() == 0:

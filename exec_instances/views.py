@@ -17,11 +17,9 @@ def upload(request):
             file_list = request.FILES.getlist('files')
             try:
                 parse = Parse(file_list,title)
-                raise ParseError
             except ParseError as e:
                 form = UploadFileForm()
                 error_message = e
-#                error_message = e
                 return render(request, 'exec_instances/upload.html', {'form': form, 'error_message': error_message})
             else:
                 redirect_url = parse.redirect_url
