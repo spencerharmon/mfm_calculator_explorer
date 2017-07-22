@@ -1,0 +1,8 @@
+{% if error_message %}
+<strong>{{ error_message }} </strong>
+{% endif %}
+<form action={% url 'exec_instances:upload' %} method="POST" enctype="multipart/form-data">
+	{% csrf_token %} 	
+	{{ form }}
+	<input type="submit" value="Submit">
+</form>

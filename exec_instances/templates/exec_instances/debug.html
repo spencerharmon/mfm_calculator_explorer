@@ -1,0 +1,5 @@
+{{ form.errors }}
+{% for file in request.FILES %}
+{{ file.name }}
+{% endfor %}
+{{ request.body }}
