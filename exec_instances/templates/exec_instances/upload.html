@@ -1,6 +1,4 @@
-{% if error_message %}
-<strong>{{ error_message }} </strong>
-{% endif %}
+{% include "exec_instances/base.html" %}
 <form action={% url 'exec_instances:upload' %} method="POST" enctype="multipart/form-data">
 	{% csrf_token %} 	
 	{{ form }}

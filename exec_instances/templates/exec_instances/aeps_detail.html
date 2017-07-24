@@ -1,0 +1,15 @@
+{% include "exec_instances/base.html" %}
+{% if site_list %}
+	<ul>
+	{% for site in site_list %}
+		<li><a href="{% url 'exec_instances:site_detail' instance_name=instance_name aeps_name=aeps_name site_id=site %}">{{ site.x }},{{ site.y }}</a></li>
+	{% endfor %}
+	</ul>
+{% else %}
+	<p>No aeps in instance.</p>
+{% endif %}
+{% if log_messages%}
+	{% for message in log_messages %}
+		<p>{{ message.actual_aeps }}: {{ message.message }}</p>
+	{% endfor %}
+{% endif %}

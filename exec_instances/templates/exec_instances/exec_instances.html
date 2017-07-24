@@ -1,0 +1,11 @@
+{% include "exec_instances/base.html" %}
+{% if exec_instances %}
+	<ul>
+	{% for instance in exec_instances.all %}
+		<li><a href="{% url 'exec_instances:instance_detail' instance_name=instance.title %}">{{ instance.title }}</a></li>
+	{% endfor %}
+	</ul>
+{% else %}
+	<p>No instances in database.</p>
+{% endif %}
+<p><a href="{% url 'exec_instances:upload' %}">Upload new instance.</a></p>
