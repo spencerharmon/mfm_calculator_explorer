@@ -2,7 +2,7 @@
 {% if aeps_list %}
 	<ul>
 	{% for aeps in aeps_list %}
-		<li><a href="{% url 'exec_instances:aeps_detail' instance_name=instance_name aeps_name=aeps.actual_aeps %}">{{ aeps.aeps }}</a></li>
+		<li><a href="{% url 'exec_instances:aeps_detail' instance_name=instance_name aeps_name=aeps.aeps %}">{{ aeps.aeps }}</a></li>
 	{% endfor %}
 	</ul>
 {% else %}

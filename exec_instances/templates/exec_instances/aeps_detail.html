@@ -2,7 +2,7 @@
 {% if site_list %}
 	<ul>
 	{% for site in site_list %}
-		<li><a href="{% url 'exec_instances:site_detail' instance_name=instance_name aeps_name=aeps_name site_id=site %}">{{ site.x }},{{ site.y }}</a></li>
+		<li><a href="{% url 'exec_instances:site_detail' instance_name=instance_name aeps_name=aeps_name site_id=site.id %}">{{ site.x }},{{ site.y }}</a></li>
 	{% endfor %}
 	</ul>
 {% else %}

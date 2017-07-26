@@ -40,11 +40,11 @@ def instance_detail(request,**kwargs):
         return exec_instances(request,error_message=error_message)
 
 def aeps_detail(request,**kwargs):
-    aeps = AEPS.objects.filter(actual_aeps=kwargs['aeps_name'])
+    aeps = AEPS.objects.filter(aeps=kwargs['aeps_name'])
     if aeps.exists():
         aeps_id = aeps[0].id
-        site_list = Sites.object.filter(aeps_id = aeps_id)
-        log_messages = aeps[0].objects.log_messages_set.all()
+        site_list = Site.objects.filter(aeps_id = aeps_id)
+        log_messages = LogMessage.objects.filter(aeps_id = aeps_id)
         return render(
             request,
             'exec_instances/aeps_detail.html',{
