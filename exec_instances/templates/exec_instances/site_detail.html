@@ -1,0 +1,11 @@
+{% include "exec_instances/base.html" %}
+{% if site %}
+	<p>{{ site }}</p>
+	<p><strong>{{ site.x }}, {{ site.y }}</strong></p>
+	<p>Atom type: {{ site.atom_type }}</p>
+	<p>Val: {{ site.val }}</p>
+	<p></p>
+	<p></p>
+{% else %}
+	<p>Site not found.</p>
+{% endif %}
